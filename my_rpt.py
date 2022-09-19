@@ -1,5 +1,11 @@
+# -*- coding:utf-8 -*-
+# Author:              Qi Wang, Tongji Univ. <wangqi14@tongji.edu.cn>
+# Established at:      2021/11/1 14:57
+# Modified at:         2022/5/2 12:21
+# Project:
+
 import pandas as pd
-#edited by wang
+
 
 def rpt_reader(fp, header=1, index_col=None, delim_whitespace=True):
     """
