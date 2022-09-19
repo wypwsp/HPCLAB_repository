@@ -28,3 +28,7 @@ def csv_reader(fp, header, index_col, drop_lables, delimiter=',', low_memory=Fal
     data_df = pd.read_table(fp, header=2, index_col=None, delimiter=',', low_memory=False)
     data_df = data_df.drop(labels=drop_lables)
     return data_df
+
+
+def new():
+    pass
