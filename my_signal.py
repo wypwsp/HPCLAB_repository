@@ -17,7 +17,75 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
+class Motion:
+    """
 
+    """
+    def __init__(self, time, motion):
+        """
+        :param time:
+        :param motion:
+        """
+        self.time = time
+        self.motion = motion
+
+    def VSI(self):
+        pass
+
+    def dft(self):
+        """
+        :param time: numpy.ndarray
+        :param motion: numpy.ndarray
+        :return: dictionary
+        0 frequency_array
+        1 amplitude_array
+        2 magnitude_array
+        3 complex_array
+        4 phase_array
+        5 powers_as_msa_array
+        6 dB_array
+
+        references:
+        1. OriginLab help files and scipy references
+        2. scipy.fftpack.fft
+        z: complex ndarray
+        with the elements:
+        [y(0),y(1),..,y(n/2),y(1-n/2),...,y(-1)]        if n is even
+        [y(0),y(1),..,y((n-1)/2),y(-(n-1)/2),...,y(-1)]  if n is odd
+        where:
+        y(j) = sum[k=0..n-1] x[k] * exp(-sqrt(-1)*j*k* 2*pi/n), j = 0..n-1
+        """
+        dt = self.time[1] - self.time[0]
+        z = fft(self.motion)
+        n = len(z)
+        t_n = int(n / 2) + 1
+        # frequency x-axis
+        # TODO check the following equations
+        frequency_array = np.linspace(0, int(n / 2) / (dt * n), t_n)
+        # amplitude 振幅
+        amplitude_array = 2 * np.abs(z)[0: t_n] / n
+        # magnitude of z 复数的幅值
+        magnitude_array = np.abs(z)[0: t_n]
+        # z: complex array
+        complex_array = z[0: t_n]
+        # phase of z
+        # phase = arc-tangent(Im/Re)
+        phase_array = np.arctan(np.imag(complex_array) / np.real(complex_array))
+        # powers as MSA from origin LAB
+        powers_as_msa_array = np.sqrt(1 / 2) * amplitude_array
+        # dB from origin LAB
+        dB_array = 20 * np.log(amplitude_array)
+        return {'frequency': frequency_array,
+                'amplitude': amplitude_array,
+                'magnitude': magnitude_array,
+                'complex': complex_array,
+                'phase': phase_array,
+                'powers': powers_as_msa_array,
+                'dB': dB_array}
+
+
+
+# 以下为备份方法
 def my_dft(time, motion):
     """
     :param time: numpy.ndarray
