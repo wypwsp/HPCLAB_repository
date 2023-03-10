@@ -5,22 +5,18 @@
 # Project:
 
 import numpy as np
-import pandas as pd
+from matplotlib import cm
 from matplotlib import pyplot as plt
-from scipy import signal
-from scipy import linalg
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
 from scipy.fftpack import fft
 from scipy.signal import butter, lfilter
-import matplotlib
-import os
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import cm
-from matplotlib.ticker import LinearLocator, FormatStrFormatter
+
 
 class Motion:
     """
 
     """
+
     def __init__(self, time, motion):
         """
         :param time:
@@ -83,6 +79,68 @@ class Motion:
                 'powers': powers_as_msa_array,
                 'dB': dB_array}
 
+    def butter_lowpass_filter(data, cutoff=60, fs=200, order=4):
+        """
+        https://blog.csdn.net/kkkxiong1/article/details/84941992
+        :param data:
+        :param cutoff:
+        :param fs:
+        :param order:
+        :return:
+        """
+        nyq = 0.5 * fs
+        normal_cutoff = cutoff / nyq
+        b, a = butter(order, normal_cutoff, btype='low', analog=False)
+        y = lfilter(b, a, data)
+        return y
+
+    def my_hanning(freq, amp, bandwidth):
+        """
+        :param freq: array 频率序列
+        :param amp: array 傅里叶幅值序列
+        :param bandwidth: 带宽 单位为频率
+        :return: 通过窗函数后的幅值
+        """
+        fs = 1. / (freq[1] - freq[0])
+        # N取奇数
+        N = int(2 * np.floor(bandwidth * fs / 2) + 1)
+        # 注意！修改以下窗函数#######
+        window = np.hanning(N)
+        # ########################
+        amp_filtered = []
+        for i in range(len(amp)):
+            n = int((N - 1) / 2)
+            # 分三段讨论
+            if i < n:
+                amp_window = np.dot(window[n - i: N], amp[0: i + n + 1]) / np.sum(window[n - i: N])
+            elif i >= len(amp) - n:
+                amp_window = np.dot(window[0: n + len(amp) - i], amp[i - n: len(amp)]) / np.sum(window[0: n + len(amp) - i])
+            else:
+                amp_window = np.dot(window, amp[i - n: i + n + 1]) / np.sum(window)
+            amp_filtered.append(amp_window)
+        return amp_filtered
+
+    def plot_3d(X, Y, Z):
+        """
+        :param X: ndarray
+        :param Y: ndarray
+        :param Z: ndarray
+        :return: return None
+        """
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        # Make data.
+        X, Y = np.meshgrid(X, Y)
+        # Plot the surface.
+        surf = ax.plot_surface(X, Y, Z, linewidth=0, cmap=cm.coolwarm, antialiased=False)
+        # Customize the z axis.
+        # ax.set_zlim(-1.01, 1.01)
+        ax.zaxis.set_major_locator(LinearLocator(11))
+        ax.zaxis.set_major_formatter(FormatStrFormatter('%.06f'))
+        # Add a color bar which maps values to colors.
+        fig.colorbar(surf, shrink=1, aspect=10)
+        plt.show()
+        return None
 
 
 # 以下为备份方法
@@ -126,17 +184,16 @@ def my_dft(time, motion):
     # phase = arc-tangent(Im/Re)
     phase_array = np.arctan(np.imag(complex_array) / np.real(complex_array))
     # powers as MSA from origin LAB
-    powers_as_msa_array = np.sqrt(1/2) * amplitude_array
+    powers_as_msa_array = np.sqrt(1 / 2) * amplitude_array
     # dB from origin LAB
     dB_array = 20 * np.log(amplitude_array)
-    return {'frequency':frequency_array,
-           'amplitude':amplitude_array,
-           'magnitude':magnitude_array,
-           'complex':complex_array,
-           'phase':phase_array,
-           'powers':powers_as_msa_array,
-           'dB':dB_array}
-
+    return {'frequency': frequency_array,
+            'amplitude': amplitude_array,
+            'magnitude': magnitude_array,
+            'complex': complex_array,
+            'phase': phase_array,
+            'powers': powers_as_msa_array,
+            'dB': dB_array}
 
 
 def my_butter_lowpass_filter(data, cutoff=60, fs=200, order=4):
@@ -180,6 +237,7 @@ def my_hanning(freq, amp, bandwidth):
             amp_window = np.dot(window, amp[i - n: i + n + 1]) / np.sum(window)
         amp_filtered.append(amp_window)
     return amp_filtered
+
 
 def plot_3d(X, Y, Z):
     """
