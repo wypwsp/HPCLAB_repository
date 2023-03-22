@@ -20,11 +20,12 @@ def rpt_reader(fp, header=1, index_col=None, delim_whitespace=True):
     return data_df
 
 
-def csv_reader(fp, header, index_col, drop_lables, delimiter=',', low_memory=False):
+def csv_reader(fp, header, index_col, drop_labels, delimiter=',', low_memory=False):
     """
 
     :return:
     """
-    data_df = pd.read_table(fp, header=2, index_col=None, delimiter=',', low_memory=False)
-    data_df = data_df.drop(labels=drop_lables)
+    data_df = pd.read_table(fp, header=header, index_col=index_col, delimiter=delimiter, low_memory=low_memory)
+    data_df = data_df.drop(labels=drop_labels)
+    # data_df.dropna(axis=0, how='any', inplace=True)
     return data_df

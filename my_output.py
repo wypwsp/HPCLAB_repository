@@ -210,19 +210,6 @@ class Export2D:
         :return: None
         """
 
-        # Colors: https://matplotlib.org/3.5.0/tutorials/colors/colormaps.html
-        if not color_id:  # if color_id is not defined
-            if type(color_map) == matplotlib.colors.ListedColormap:  # continuously, usually 256 colors
-                color_id = np.arange(0, color_map.N, 1)
-            else:  # separated, usually less than 10
-                interval = int(color_map.N / (len(self.line_array) + 1))
-                color_id = np.arange(interval, color_map.N - interval + 1, interval)
-
-        # Line properties
-        if type(line_property_plot[0]) is not tuple:  # Duplicate identical line_property_plot
-            line_property_plot_temp = []
-            [line_property_plot_temp.append(line_property_plot) for _ in range(len(self.line_array))]
-            line_property_plot = tuple(line_property_plot_temp)
         fig_row_num = int(len(self.line_array) / fig_col_num)
         fig, axes = plt.subplots(fig_row_num, fig_col_num,
                                  figsize=(figsize[0] * fig_col_num, figsize[1] * fig_row_num),
@@ -230,9 +217,24 @@ class Export2D:
 
         if fig_col_num == 1 or fig_row_num == 1:
             for fig_num_i, single_line_array in enumerate(self.line_array):
+                # Line properties
+                if type(line_property_plot[0]) is not tuple:  # Duplicate identical line_property_plot
+                    line_property_plot_temp = []
+                    [line_property_plot_temp.append(line_property_plot) for _ in range(len(single_line_array))]
+                    line_property_plot = tuple(line_property_plot_temp)
+
+                # Colors: https://matplotlib.org/3.5.0/tutorials/colors/colormaps.html
+                color_id_single_line = color_id
+                if not color_id_single_line:  # if color_id is not defined
+                    if type(color_map) == matplotlib.colors.ListedColormap:  # continuously, usually 256 colors
+                        color_id_single_line = np.arange(0, color_map.N, 1)
+                    else:  # separated, usually less than 10
+                        interval = int(color_map.N / (len(single_line_array) + 1))
+                        color_id_single_line = np.arange(interval, color_map.N - interval + 1, interval)
+
                 # Line
                 for i, line in enumerate(single_line_array):
-                    axes[fig_num_i].plot(line.x, line.y, label=line.y_name, color=color_map(color_id[i]),
+                    axes[fig_num_i].plot(line.x, line.y, label=line.y_name, color=color_map(color_id_single_line[i]),
                                          linestyle=line_property_plot[i][0], linewidth=line_property_plot[i][1],
                                          marker=line_property_plot[i][2], markersize=line_property_plot[i][3])
                 # Axis
@@ -260,9 +262,24 @@ class Export2D:
             for col in range(fig_col_num):
                 for row in range(fig_row_num):
                     fig_num_i = col * fig_row_num + row
+                    # Line properties
+                    if type(line_property_plot[0]) is not tuple:  # Duplicate identical line_property_plot
+                        line_property_plot_temp = []
+                        [line_property_plot_temp.append(line_property_plot) for _ in range(len(self.line_array[fig_num_i]))]
+                        line_property_plot = tuple(line_property_plot_temp)
+
+                    # Colors: https://matplotlib.org/3.5.0/tutorials/colors/colormaps.html
+                    color_id_single_line = color_id
+                    if not color_id_single_line:  # if color_id is not defined
+                        if type(color_map) == matplotlib.colors.ListedColormap:  # continuously, usually 256 colors
+                            color_id_single_line = np.arange(0, color_map.N, 1)
+                        else:  # separated, usually less than 10
+                            interval = int(color_map.N / (len(self.line_array[fig_num_i]) + 1))
+                            color_id_single_line = np.arange(interval, color_map.N - interval + 1, interval)
+
                     # Line
                     for i, line in enumerate(self.line_array[fig_num_i]):
-                        axes[row, col].plot(line.x, line.y, label=line.y_name, color=color_map(color_id[i]),
+                        axes[row, col].plot(line.x, line.y, label=line.y_name, color=color_map(color_id_single_line[i]),
                                             linestyle=line_property_plot[i][0], linewidth=line_property_plot[i][1],
                                             marker=line_property_plot[i][2], markersize=line_property_plot[i][3])
                     # Axis
@@ -314,6 +331,12 @@ class Export3D:
     def __init__(self):
         pass
 
+class ExportArray:
+    def __init__(self):
+        pass
+    @ staticmethod
+    def export_to_csv(value, file_name):
+        np.savetxt(file_name, value, delimiter=',', fmt='%s')
 
 if __name__ == '__main__':
     # TEST
